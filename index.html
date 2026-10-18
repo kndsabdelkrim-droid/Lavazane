@@ -56,6 +56,16 @@ button{border:0;color:#fff;cursor:pointer;font-family:inherit}
 button:focus-visible,select:focus-visible{outline:2px solid #facc15;outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.lava.go{animation-duration:40s}.warn{animation:none!important}}
 .warn{animation:pl 1s infinite}@keyframes pl{50%{opacity:.4}}
+input[type=text]{width:100%;padding:12px;border-radius:12px;background:#111827;color:#fff;border:1px solid #374151;font-size:13px;text-align:right;font-family:inherit}
+input[type=text]:focus-visible{outline:2px solid #facc15;outline-offset:2px}
+.badge{background:#111827;border:1px solid #374151;border-radius:12px;padding:12px;font:12px ui-monospace,monospace;text-align:right;line-height:2;margin-bottom:12px}
+.badge .n{color:#f87171;font-weight:700}.badge .s{color:#facc15;font-weight:700}.badge .ok{color:#4ade80}
+#win{margin:auto 0;text-align:center;border-color:#eab308}
+#win h2{color:#facc15;font-size:20px;margin-bottom:12px}
+.share{width:100%;padding:12px;border-radius:12px;font-weight:700;font-size:13px;background:#2563eb;margin-bottom:8px}
+.share:hover{background:#1d4ed8}
+.sec{width:100%;padding:10px;border-radius:12px;font-size:12px;background:#1f2937;color:#d1d5db}
+#msg{font-size:12px;color:#4ade80;min-height:18px;margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -72,8 +82,12 @@ button:focus-visible,select:focus-visible{outline:2px solid #facc15;outline-offs
   <div class="body">
     <section id="setup" class="panel">
       <div>
-        <h2>🔥 محاكي الواقع الجزائري</h2>
-        <p>اختر بيئة المحاكاة لتنطلق لعبة الحمم البركانية مع مؤثرات الاهتزاز والصوت.</p>
+        <h2>🔥 تحدي النجاة الجزائري</h2>
+        <p>اكتب اسمك، اختر البيئة، وانجُ من الحمم ثم شارك بطاقتك مع أصدقائك.</p>
+      </div>
+      <div>
+        <label for="pname">اسمك أو لقبك (للوحة الشرف):</label>
+        <input type="text" id="pname" maxlength="20" placeholder="بطل الجزائر" autocomplete="off">
       </div>
       <div>
         <label for="loc">اختر البيئة الافتراضية:</label>
@@ -89,11 +103,24 @@ button:focus-visible,select:focus-visible{outline:2px solid #facc15;outline-offs
 
     <section id="game" class="hidden">
       <div class="panel hud">
-        <div class="row"><span class="warn">⚠️ الحمم تكتسح البيئة!</span><span id="tl">00:20</span></div>
+        <div class="row"><span class="warn" id="warn">⚠️ الحمم ترتفع!</span><span id="tl">00:20</span></div>
         <div class="bar"><div id="pb"></div></div>
       </div>
       <div class="panel scene" id="scene"></div>
       <div id="opts"></div>
+    </section>
+
+    <section id="win" class="panel hidden">
+      <h2>🏆 بطاقة النجاة الرسمية</h2>
+      <div class="badge">
+        <div>اللاعب: <span class="n" id="vName"></span></div>
+        <div>المكان: <span id="vLoc"></span></div>
+        <div>النتيجة: <span class="s" id="vScore"></span> نقطة</div>
+        <div>الحالة: <span class="ok">ناجٍ أسطوري 🥇</span></div>
+      </div>
+      <div id="msg" aria-live="polite"></div>
+      <button class="share" id="share">📤 مشاركة النتيجة (إنستغرام / تيك توك)</button>
+      <button class="sec" id="home">🔄 العودة للقائمة الرئيسية</button>
     </section>
 
     <section id="end" class="panel hidden">
@@ -109,7 +136,8 @@ button:focus-visible,select:focus-visible{outline:2px solid #facc15;outline-offs
 <script>
 const $ = id => document.getElementById(id);
 const TIME = 20;
-let score = 0, left = TIME, tid = null, step = 0, loc = 'hamma', ac = null;
+let score = 0, left = TIME, tid = null, step = 0, loc = 'hamma', ac = null, pname = 'بطل الجزائر';
+const NAMES = {hamma:'حدائق الحامة',constantine:'جسور قسنطينة',oran:'كورنيش وهران',sba:'سيدي بلعباس'};
 
 const S = {
   hamma: [
@@ -149,7 +177,7 @@ function beep(freq=440, type='sine', dur=0.1){
   }catch(e){}
 }
 function haptic(p=[100]){ if('vibrate' in navigator) navigator.vibrate(p); }
-function show(id){ ['setup','game','end'].forEach(s => $(s).classList.toggle('hidden', s!==id)); }
+function show(id){ ['setup','game','win','end'].forEach(s => $(s).classList.toggle('hidden', s!==id)); }
 function fmt(){ $('tl').textContent='00:'+String(left).padStart(2,'0'); $('pb').style.width=(left/TIME*100)+'%'; }
 
 function restartLava(){
@@ -159,11 +187,13 @@ function startTimer(){
   clearInterval(tid); left = TIME; fmt(); restartLava();
   tid = setInterval(() => {
     left--; fmt();
+    if(left===10){ $('warn').textContent='⚡ تنبيه: ظهرت عقبة مفاجئة!'; beep(660,'square',0.2); haptic([120,60,120]); }
     if(left<=5 && left>0){ beep(800,'sawtooth',0.15); haptic([150]); }
     if(left<=0) finish(false);
   }, 1000);
 }
 function load(){
+  $('warn').textContent='⚠️ الحمم ترتفع!';
   startTimer();
   const d = S[loc][step];
   $('scene').textContent = d.t;
@@ -186,15 +216,33 @@ function move(pts, next){
 function finish(win){
   clearInterval(tid);
   $('lava').classList.remove('go');
-  if(win){ haptic([100,50,100,50,200]); beep(880,'sine',0.3); } else { haptic([300,100,300]); beep(200,'sawtooth',0.4); }
+  if(win){
+    haptic([100,50,100,50,200]); beep(880,'sine',0.3);
+    $('vName').textContent = pname; $('vLoc').textContent = NAMES[loc]; $('vScore').textContent = score;
+    $('msg').textContent = ''; show('win'); return;
+  }
+  haptic([300,100,300]); beep(200,'sawtooth',0.4);
   $('endT').textContent = win ? '🎉 مبروك! نجوت!' : '🌋 انغمرت المنطقة بالحمم!';
   $('endP').textContent = win ? 'حصدت ' + score + ' نقطة في هذه البيئة.' : 'انتهى الوقت. حاول مرة أخرى.';
   show('end');
 }
 function start(){
+  pname = $('pname').value.trim() || 'بطل الجزائر';
   loc = $('loc').value; step = 0; score = 0; $('score').textContent = 0;
   $('bg').className = 'bg ' + loc;
   show('game'); load();
+}
+async function share(){
+  const text = '🔥 نجوت في لعبة Lava Zone Algeria (' + NAMES[loc] + ') وحصدت ' + score + ' نقطة! تحداني إن استطعت 😎🌋';
+  const url = location.href.split('?')[0];
+  try{
+    if(navigator.share){ await navigator.share({title:'Lava Zone Algeria', text, url}); return; }
+    await navigator.clipboard.writeText(text + ' ' + url);
+    $('msg').textContent = '✅ تم نسخ النتيجة، الصقها في ستوري إنستغرام أو تيك توك.';
+  }catch(e){
+    if(e && e.name === 'AbortError') return;
+    $('msg').textContent = 'تعذّر النسخ تلقائياً. انسخ النص يدوياً: ' + text;
+  }
 }
 async function update(){
   try{
@@ -211,6 +259,8 @@ async function update(){
 }
 
 $('start').addEventListener('click', start);
+$('share').addEventListener('click', share);
+$('home').addEventListener('click', () => show('setup'));
 $('again').addEventListener('click', () => show('setup'));
 $('upd').addEventListener('click', update);
 $('loc').addEventListener('change', () => { $('bg').className = 'bg ' + $('loc').value; });
