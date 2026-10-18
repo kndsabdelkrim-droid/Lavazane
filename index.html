@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#ef4444">
+<title>Lava Zone - Algeria Dev Engine</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg">
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;background:#111827;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif}
+.card{width:100%;max-width:420px;background:#1f2937;border:1px solid rgba(239,68,68,.3);border-radius:20px;padding:24px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,.4)}
+h1{margin:0 0 4px;font-size:28px;color:#ef4444}
+.sub{color:#9ca3af;font-size:12px;margin:0 0 16px}
+label{display:block;text-align:right;font-size:12px;color:#9ca3af;margin-bottom:6px}
+select{width:100%;padding:10px;border-radius:10px;background:#111827;color:#fff;border:1px solid #374151;font-size:14px;margin-bottom:16px}
+.lava{background:rgba(69,10,10,.5);border:1px solid #dc2626;border-radius:14px;padding:16px;margin-bottom:16px}
+.lava small{color:#f87171;font-size:12px}
+#timer{font-size:44px;font-weight:800;color:#ef4444;margin:4px 0;font-variant-numeric:tabular-nums}
+#status{font-size:12px;color:#facc15}
+.gps{background:#111827;border:1px solid #374151;border-radius:10px;padding:12px;text-align:right;font:12px ui-monospace,Menlo,monospace;color:#4ade80;margin-bottom:16px;direction:ltr}
+.gps div{display:flex;justify-content:space-between}
+button{width:100%;border:0;border-radius:12px;color:#fff;font-weight:700;cursor:pointer;margin-bottom:8px;transition:background .15s}
+.fire{background:#dc2626;padding:14px;font-size:16px}.fire:hover{background:#b91c1c}
+.loc{background:#2563eb;padding:10px;font-size:14px}.loc:hover{background:#1d4ed8}
+button:focus-visible,select:focus-visible{outline:2px solid #facc15;outline-offset:2px}
+.flash{animation:flash .5s 3}
+@keyframes flash{50%{background:#7f1d1d}}
+@media (prefers-reduced-motion:reduce){.flash{animation:none}}
+</style>
+</head>
+<body>
+<main class="card">
+  <h1>🌋 Lava Zone Dev</h1>
+  <p class="sub">النسخة الخاصة بالمطور - خفيفة ومفتوحة المصدر</p>
+
+  <label for="city">موقع البداية</label>
+  <select id="city">
+    <option value="36.7650,3.0100">🌳 حديقة الحامة - الجزائر العاصمة</option>
+    <option value="35.7050,-0.6300">🌊 كورنيش وهران</option>
+    <option value="36.3650,6.6147">🌉 جسور قسنطينة</option>
+    <option value="35.1897,-0.6308">🏙️ سيدي بلعباس</option>
+    <option value="gps">📡 موقعي الحالي (GPS)</option>
+  </select>
+
+  <div class="lava" id="lavaBox">
+    <small>الوقت المتبقي قبل انغمار المنطقة:</small>
+    <div id="timer">00:30</div>
+    <div id="status">اختر موقعاً ثم شغّل الإنذار</div>
+  </div>
+
+  <div class="gps">
+    <div><span>Lat:</span><span id="lat">--</span></div>
+    <div><span>Lng:</span><span id="lng">--</span></div>
+    <div><span>Elevation:</span><span id="alt">غير محدد</span></div>
+  </div>
+
+  <button class="fire" id="fire">🔥 تشغيل إنذار الحمم</button>
+  <button class="loc" id="loc">📍 تحديث موقع الـ GPS</button>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+let timeLeft = 30, timerId = null;
+
+function setCoords(lat, lng, alt) {
+  $('lat').textContent = Number(lat).toFixed(4);
+  $('lng').textContent = Number(lng).toFixed(4);
+  $('alt').textContent = alt != null ? Math.round(alt) + ' م' : 'غير محدد';
+}
+
+function applyCity() {
+  const v = $('city').value;
+  if (v === 'gps') return getLocation();
+  const [lat, lng] = v.split(',');
+  setCoords(lat, lng, null);
+  $('status').textContent = 'تم اختيار الموقع ✅';
+}
+
+function getLocation() {
+  if (!navigator.geolocation) { $('status').textContent = 'الـ GPS غير مدعوم، وضع المحاكاة مفعّل'; return; }
+  $('status').textContent = 'جاري فحص الـ GPS...';
+  navigator.geolocation.getCurrentPosition(
+    p => { setCoords(p.coords.latitude, p.coords.longitude, p.coords.altitude); $('status').textContent = 'تم تحديد موقعك الميداني ✅'; },
+    () => { $('status').textContent = 'تعذّر الوصول للـ GPS، وضع المحاكاة مفعّل'; applyCity_fallback(); },
+    { enableHighAccuracy: true, timeout: 8000 }
+  );
+}
+function applyCity_fallback() {
+  const first = document.querySelector('#city option').value.split(',');
+  setCoords(first[0], first[1], null);
+}
+
+function render() {
+  $('timer').textContent = '00:' + String(timeLeft).padStart(2, '0');
+}
+
+function triggerLava() {
+  clearInterval(timerId);
+  timeLeft = 30; render();
+  $('status').textContent = 'اهرب إلى مكان مرتفع!';
+  timerId = setInterval(() => {
+    timeLeft--; render();
+    if (timeLeft <= 0) {
+      clearInterval(timerId);
+      $('status').textContent = '🌋 ارتفع منسوب الحمم! ابحث عن مكان مرتفع فوراً.';
+      const box = $('lavaBox'); box.classList.remove('flash'); void box.offsetWidth; box.classList.add('flash');
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    }
+  }, 1000);
+}
+
+$('fire').addEventListener('click', triggerLava);
+$('loc').addEventListener('click', getLocation);
+$('city').addEventListener('change', applyCity);
+applyCity();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(console.error));
+}
+</script>
+</body>
+</html>
