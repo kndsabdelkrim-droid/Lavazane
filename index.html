@@ -4,117 +4,167 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#ef4444">
-<title>Lava Zone - Algeria Dev Engine</title>
+<title>Lava Zone Algeria Game</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg">
 <style>
 *{box-sizing:border-box}
 body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;background:#111827;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif}
-.card{width:100%;max-width:420px;background:#1f2937;border:1px solid rgba(239,68,68,.3);border-radius:20px;padding:24px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,.4)}
-h1{margin:0 0 4px;font-size:28px;color:#ef4444}
-.sub{color:#9ca3af;font-size:12px;margin:0 0 16px}
-label{display:block;text-align:right;font-size:12px;color:#9ca3af;margin-bottom:6px}
-select{width:100%;padding:10px;border-radius:10px;background:#111827;color:#fff;border:1px solid #374151;font-size:14px;margin-bottom:16px}
-.lava{background:rgba(69,10,10,.5);border:1px solid #dc2626;border-radius:14px;padding:16px;margin-bottom:16px}
-.lava small{color:#f87171;font-size:12px}
-#timer{font-size:44px;font-weight:800;color:#ef4444;margin:4px 0;font-variant-numeric:tabular-nums}
-#status{font-size:12px;color:#facc15}
-.gps{background:#111827;border:1px solid #374151;border-radius:10px;padding:12px;text-align:right;font:12px ui-monospace,Menlo,monospace;color:#4ade80;margin-bottom:16px;direction:ltr}
-.gps div{display:flex;justify-content:space-between}
-button{width:100%;border:0;border-radius:12px;color:#fff;font-weight:700;cursor:pointer;margin-bottom:8px;transition:background .15s}
-.fire{background:#dc2626;padding:14px;font-size:16px}.fire:hover{background:#b91c1c}
-.loc{background:#2563eb;padding:10px;font-size:14px}.loc:hover{background:#1d4ed8}
+.card{width:100%;max-width:420px;background:#1f2937;border:1px solid rgba(239,68,68,.3);border-radius:20px;padding:20px;box-shadow:0 20px 40px rgba(0,0,0,.4)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid #374151;padding-bottom:10px;margin-bottom:14px;font-size:12px}
+.logo{color:#ef4444;font-weight:700;font-size:18px}
+.pill{background:#111827;border:1px solid rgba(234,179,8,.4);border-radius:999px;padding:4px 12px}
+.pill b{color:#facc15}
+.hidden{display:none}
+label{display:block;font-size:12px;color:#9ca3af;margin-bottom:6px}
+select{width:100%;padding:12px;border-radius:12px;background:#111827;color:#fff;border:1px solid #374151;font-size:14px;margin-bottom:14px}
+button{border:0;color:#fff;cursor:pointer;font-family:inherit}
+.main{width:100%;background:#dc2626;padding:14px;border-radius:12px;font-size:16px;font-weight:700}
+.main:hover{background:#b91c1c}
+.timer{background:rgba(69,10,10,.6);border:1px solid #dc2626;border-radius:12px;padding:10px;text-align:center;margin-bottom:12px}
+.timer small{font-size:12px;color:#fca5a5}
+#timer{font-size:40px;font-weight:800;color:#ef4444;font-variant-numeric:tabular-nums}
+#timer.low{animation:pulse .6s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.scene{background:#111827;border:1px solid #374151;border-radius:12px;padding:14px;font-size:13px;line-height:1.8;margin-bottom:12px}
+.opt{width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;background:#111827;border:1px solid #374151;border-radius:12px;padding:12px;margin-bottom:8px;font-size:13px;text-align:right}
+.opt:hover{background:#374151}
+.opt span:last-child{color:#facc15;font-family:ui-monospace,monospace}
+.result{text-align:center;padding:8px 0}
+.result h2{margin:0 0 8px;font-size:20px}
+.result p{color:#d1d5db;font-size:14px;margin:0 0 16px}
+.foot{display:flex;justify-content:center;margin-top:14px}
+.upd{background:#374151;padding:6px 12px;border-radius:8px;font-size:12px}
+.upd:hover{background:#4b5563}
 button:focus-visible,select:focus-visible{outline:2px solid #facc15;outline-offset:2px}
-.flash{animation:flash .5s 3}
-@keyframes flash{50%{background:#7f1d1d}}
-@media (prefers-reduced-motion:reduce){.flash{animation:none}}
+@media (prefers-reduced-motion:reduce){#timer.low{animation:none}}
 </style>
 </head>
 <body>
 <main class="card">
-  <h1>🌋 Lava Zone Dev</h1>
-  <p class="sub">النسخة الخاصة بالمطور - خفيفة ومفتوحة المصدر</p>
-
-  <label for="city">موقع البداية</label>
-  <select id="city">
-    <option value="36.7650,3.0100">🌳 حديقة الحامة - الجزائر العاصمة</option>
-    <option value="35.7050,-0.6300">🌊 كورنيش وهران</option>
-    <option value="36.3650,6.6147">🌉 جسور قسنطينة</option>
-    <option value="35.1897,-0.6308">🏙️ سيدي بلعباس</option>
-    <option value="gps">📡 موقعي الحالي (GPS)</option>
-  </select>
-
-  <div class="lava" id="lavaBox">
-    <small>الوقت المتبقي قبل انغمار المنطقة:</small>
-    <div id="timer">00:30</div>
-    <div id="status">اختر موقعاً ثم شغّل الإنذار</div>
+  <div class="top">
+    <span class="logo">🌋 Lava Zone</span>
+    <div class="pill">النقاط: <b id="score">0</b></div>
   </div>
 
-  <div class="gps">
-    <div><span>Lat:</span><span id="lat">--</span></div>
-    <div><span>Lng:</span><span id="lng">--</span></div>
-    <div><span>Elevation:</span><span id="alt">غير محدد</span></div>
-  </div>
+  <section id="setup">
+    <label for="loc">اختر موقع التحدي في الجزائر:</label>
+    <select id="loc">
+      <option value="hamma">🌳 حديقة التجارب الحامة (العاصمة)</option>
+      <option value="oran">🌊 كورنيش مرسى بن مهيدي (وهران)</option>
+      <option value="constantine">🌉 جسور قسنطينة (ساحة أول نوفمبر)</option>
+      <option value="sba">🏙️ سيدي بلعباس (وسط المدينة)</option>
+    </select>
+    <button class="main" id="start">🎮 إطلاق اللعبة والهروب!</button>
+  </section>
 
-  <button class="fire" id="fire">🔥 تشغيل إنذار الحمم</button>
-  <button class="loc" id="loc">📍 تحديث موقع الـ GPS</button>
+  <section id="game" class="hidden">
+    <div class="timer"><small>الحمم ترتفع! الوقت المتبقي:</small><div id="timer">00:20</div></div>
+    <div class="scene" id="scene"></div>
+    <div id="opts"></div>
+  </section>
+
+  <section id="end" class="hidden">
+    <div class="result">
+      <h2 id="endTitle"></h2>
+      <p id="endText"></p>
+      <button class="main" id="again">🔁 العب مرة أخرى</button>
+    </div>
+  </section>
+
+  <div class="foot"><button class="upd" id="upd">🔄 تحديث التطبيق</button></div>
 </main>
 
 <script>
 const $ = id => document.getElementById(id);
-let timeLeft = 30, timerId = null;
+const TIME = 20;
+let score = 0, left = TIME, tid = null, step = 0, loc = 'hamma';
 
-function setCoords(lat, lng, alt) {
-  $('lat').textContent = Number(lat).toFixed(4);
-  $('lng').textContent = Number(lng).toFixed(4);
-  $('alt').textContent = alt != null ? Math.round(alt) + ' م' : 'غير محدد';
-}
+const S = {
+  hamma: [
+    { t: "⚠️ ارتفع منسوب الحمم قرب النافورة المركزية بحديقة الحامة! أمامك ثوانٍ معدودة لتفادي الحرارة.",
+      o: [["🌴 الصعود على جذع شجرة الموز المعمرة",100,1],["🏛️ القفز فوق مدرجات النافورة الرخامية",80,1],["☕ التسلق فوق طاولة مقهى الحديقة",50,1]] },
+    { t: "✅ ممتاز! وصلت لمكان مرتفع، لكن الحمم بدأت تغطي الممرات الرئيسية المتجهة للمخرج!",
+      o: [["🧗 الانتقال عبر أغصان الأشجار المتشابكة",150,'win'],["🏃 الركض السريع فوق سور الحديقة الحجري",120,'win']] }
+  ],
+  constantine: [
+    { t: "⚠️ صفارات الإنذار تدوي في ساحة أول نوفمبر بقسنطينة! الحمم تتصاعد من أطراف الوادي!",
+      o: [["🌉 الركض نحو الجسر المعلق والصعود على حاجز الأمان",120,1],["🏛️ صعود درجات المسرح الجهوي السريعة",90,1]] },
+    { t: "🔥 الحمم تقترب من منتصف الساحة! عليك الوصول إلى النقطة الآمنة النهائية.",
+      o: [["🪜 التسلق نحو أعلى السور التاريخي",150,'win']] }
+  ],
+  oran: [
+    { t: "⚠️ الحمم تغطي شاطئ وهران والكورنيش! عليك الهروب نحو المرتفعات بسرعة.",
+      o: [["🧗 صعود درجات الكورنيش الحجرية",100,'win'],["🚗 القفز فوق سقف شاحنة مركونة",80,'win']] }
+  ],
+  sba: [
+    { t: "⚠️ الحمم تتدفق نحو وسط سيدي بلعباس من جهة الوادي! الشوارع تمتلئ بالدخان.",
+      o: [["🌉 الركض فوق الجسر نحو الضفة المرتفعة",110,1],["🌳 تسلق الأشجار في الحديقة العامة",90,1],["🏢 صعود الدرج الخارجي لعمارة قريبة",70,1]] },
+    { t: "🔥 الحمم تحاصر الشارع الرئيسي! تحتاج إلى مكان آمن أعلى قبل أن ينتهي الوقت.",
+      o: [["🧱 القفز من حاجز إلى حاجز حتى سطح المبنى",150,'win'],["🏃 الركض عبر الأزقة الجانبية المرتفعة",120,'win']] }
+  ]
+};
 
-function applyCity() {
-  const v = $('city').value;
-  if (v === 'gps') return getLocation();
-  const [lat, lng] = v.split(',');
-  setCoords(lat, lng, null);
-  $('status').textContent = 'تم اختيار الموقع ✅';
-}
+function fmt(){ $('timer').textContent = '00:' + String(left).padStart(2,'0'); $('timer').classList.toggle('low', left <= 5); }
+function show(id){ ['setup','game','end'].forEach(s => $(s).classList.toggle('hidden', s !== id)); }
 
-function getLocation() {
-  if (!navigator.geolocation) { $('status').textContent = 'الـ GPS غير مدعوم، وضع المحاكاة مفعّل'; return; }
-  $('status').textContent = 'جاري فحص الـ GPS...';
-  navigator.geolocation.getCurrentPosition(
-    p => { setCoords(p.coords.latitude, p.coords.longitude, p.coords.altitude); $('status').textContent = 'تم تحديد موقعك الميداني ✅'; },
-    () => { $('status').textContent = 'تعذّر الوصول للـ GPS، وضع المحاكاة مفعّل'; applyCity_fallback(); },
-    { enableHighAccuracy: true, timeout: 8000 }
-  );
-}
-function applyCity_fallback() {
-  const first = document.querySelector('#city option').value.split(',');
-  setCoords(first[0], first[1], null);
-}
-
-function render() {
-  $('timer').textContent = '00:' + String(timeLeft).padStart(2, '0');
-}
-
-function triggerLava() {
-  clearInterval(timerId);
-  timeLeft = 30; render();
-  $('status').textContent = 'اهرب إلى مكان مرتفع!';
-  timerId = setInterval(() => {
-    timeLeft--; render();
-    if (timeLeft <= 0) {
-      clearInterval(timerId);
-      $('status').textContent = '🌋 ارتفع منسوب الحمم! ابحث عن مكان مرتفع فوراً.';
-      const box = $('lavaBox'); box.classList.remove('flash'); void box.offsetWidth; box.classList.add('flash');
-      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-    }
+function startTimer(){
+  clearInterval(tid); left = TIME; fmt();
+  tid = setInterval(() => {
+    left--; fmt();
+    if (left <= 0) finish(false);
   }, 1000);
 }
 
-$('fire').addEventListener('click', triggerLava);
-$('loc').addEventListener('click', getLocation);
-$('city').addEventListener('change', applyCity);
-applyCity();
+function load(){
+  startTimer();
+  const d = S[loc][step];
+  $('scene').textContent = d.t;
+  const box = $('opts'); box.innerHTML = '';
+  d.o.forEach(([txt, pts, next]) => {
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.innerHTML = '<span></span><span>+' + pts + '</span>';
+    b.firstChild.textContent = txt;
+    b.onclick = () => move(pts, next);
+    box.appendChild(b);
+  });
+}
+
+function move(pts, next){
+  score += pts; $('score').textContent = score;
+  if (next === 'win') finish(true); else { step = next; load(); }
+}
+
+function finish(win){
+  clearInterval(tid);
+  $('endTitle').textContent = win ? '🎉 نجوت!' : '🌋 انغمرت المنطقة بالحمم!';
+  $('endText').textContent = win ? 'مجموع نقاطك: ' + score : 'انتهى الوقت. حاول مرة أخرى.';
+  show('end');
+}
+
+function start(){
+  loc = $('loc').value; step = 0; score = 0; $('score').textContent = 0;
+  show('game'); load();
+}
+
+async function update(){
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+    if (window.caches) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+  } catch (e) { console.error(e); }
+  location.reload();
+}
+
+$('start').addEventListener('click', start);
+$('again').addEventListener('click', () => show('setup'));
+$('upd').addEventListener('click', update);
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(console.error));
