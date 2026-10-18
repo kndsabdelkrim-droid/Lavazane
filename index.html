@@ -16,6 +16,7 @@ body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:c
 .bg.constantine{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 600' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23fbbf24'/%3E%3Cstop offset='.7' stop-color='%23fde68a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='600' fill='url(%23g)'/%3E%3Crect y='330' width='400' height='270' fill='%2378350f'/%3E%3Crect y='330' width='120' height='270' fill='%2392400e'/%3E%3Crect x='280' y='330' width='120' height='270' fill='%2392400e'/%3E%3Crect y='300' width='400' height='22' fill='%23374151'/%3E%3Cg stroke='%23374151' stroke-width='6'%3E%3Cpath d='M0 300 L100 220 L200 300 L300 220 L400 300' fill='none'/%3E%3Cpath d='M100 220 V300 M300 220 V300' /%3E%3C/g%3E%3C/svg%3E") center/cover}
 .bg.oran{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 600' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23fb923c'/%3E%3Cstop offset='.5' stop-color='%23fde68a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='600' fill='url(%23g)'/%3E%3Crect y='300' width='400' height='200' fill='%230369a1'/%3E%3Cpath d='M0 330 q25 -14 50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0' stroke='%237dd3fc' stroke-width='4' fill='none'/%3E%3Crect y='480' width='400' height='120' fill='%23a8a29e'/%3E%3Cpath d='M0 300 L60 240 L140 300 Z' fill='%2357534e'/%3E%3C/svg%3E") center/cover}
 .bg.sba{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 600' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%236366f1'/%3E%3Cstop offset='.7' stop-color='%23fecaca'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='600' fill='url(%23g)'/%3E%3Cg fill='%23e5e7eb'%3E%3Crect x='20' y='300' width='70' height='300'/%3E%3Crect x='100' y='350' width='60' height='250'/%3E%3Crect x='240' y='280' width='80' height='320'/%3E%3Crect x='330' y='340' width='60' height='260'/%3E%3C/g%3E%3Cg fill='%2394a3b8'%3E%3Crect x='35' y='330' width='14' height='18'/%3E%3Crect x='60' y='330' width='14' height='18'/%3E%3Crect x='260' y='310' width='14' height='18'/%3E%3Crect x='290' y='310' width='14' height='18'/%3E%3C/g%3E%3Crect y='520' width='400' height='80' fill='%23475569'/%3E%3C/svg%3E") center/cover}
+.photo{opacity:0;transition:opacity .8s}.photo.on{opacity:1}
 .dim{position:absolute;inset:0;z-index:1;background:rgba(3,7,18,.45)}
 .lava{position:absolute;left:0;right:0;bottom:0;height:0;z-index:10;pointer-events:none;background:linear-gradient(to top,#dc2626,#f97316 60%,transparent)}
 .lava.go{animation:rise 20s linear forwards}
@@ -71,6 +72,7 @@ input[type=text]:focus-visible{outline:2px solid #facc15;outline-offset:2px}
 <body>
 <div class="app">
   <div class="bg hamma" id="bg"></div>
+  <div class="bg photo" id="photo"></div>
   <div class="dim"></div>
   <div class="lava" id="lava"></div>
 
@@ -82,7 +84,7 @@ input[type=text]:focus-visible{outline:2px solid #facc15;outline-offset:2px}
   <div class="body">
     <section id="setup" class="panel">
       <div>
-        <h2>🔥 تحدي النجاة الجزائري</h2>
+        <h2>🔥 التحدي الجزائري المتجدد</h2>
         <p>اكتب اسمك، اختر البيئة، وانجُ من الحمم ثم شارك بطاقتك مع أصدقائك.</p>
       </div>
       <div>
@@ -98,7 +100,7 @@ input[type=text]:focus-visible{outline:2px solid #facc15;outline-offset:2px}
           <option value="sba">🏙️ سيدي بلعباس - وسط المدينة</option>
         </select>
       </div>
-      <button class="main" id="start">🚀 بدء محاكاة التحدي والهروب!</button>
+      <button class="main" id="start">🚀 انطلق في التحدي العشوائي!</button>
     </section>
 
     <section id="game" class="hidden">
@@ -136,33 +138,81 @@ input[type=text]:focus-visible{outline:2px solid #facc15;outline-offset:2px}
 <script>
 const $ = id => document.getElementById(id);
 const TIME = 20;
-let score = 0, left = TIME, tid = null, step = 0, loc = 'hamma', ac = null, pname = 'بطل الجزائر';
+let score = 0, left = TIME, tid = null, step = 0, loc = 'hamma', ac = null, pname = 'بطل الجزائر', chal = [];
 const NAMES = {hamma:'حدائق الحامة',constantine:'جسور قسنطينة',oran:'كورنيش وهران',sba:'سيدي بلعباس'};
 
 const S = {
   hamma: [
-    { t:"⚠️ بدأت الحمم البركانية تتدفق حول النافورة المركزية بحديقة الحامة! أمامك ثوانٍ للنجاة.",
-      o:[["🌴 الصعود السريع على جذع شجرة الموز المعمرة",100,1],["🏛️ تسلق مدرجات النافورة الرخامية",80,1],["☕ القفز فوق طاولة مقهى الحديقة",50,1]] },
-    { t:"🔥 ممتاز! ارتفعت عن الأرض، لكن الحمم تلاحقك وتغطي الممرات!",
-      o:[["🧗 التسلق عبر السور الحجري العلوي",150,'win'],["🏃 الركض السريع نحو المنصة الرئيسية",120,'win']] }
+    [
+      { t:"⚠️ انفجار بركاني قرب المدخل الرئيسي لحديقة الحامة! الأرض تسخن بسرعة.",
+        o:[["🌴 القفز وتسلق جذع شجرة الموز المعمرة",100,1],["🏛️ الهروب وصعود مدرجات النافورة الرخامية",80,1]] },
+      { t:"⚡ عقبة مفاجئة: هبت رياح قوية تهز مكانك! كيف تحافظ على توازنك؟",
+        o:[["🧗 التشبث بقوة بغصن شجرة سميك",150,'win'],["🏃 القفز بحذر نحو السور الحجري القريب",120,'win']] }
+    ],
+    [
+      { t:"⚠️ تدفقت الحمم من جهة الدفيئات النباتية! أين تفضل الهروب؟",
+        o:[["🌿 الصعود فوق سقف الاستراحة الخشبية",90,1],["🧱 القفز فوق القاعدة الاسمنتية للتمثال",110,'win']] },
+      { t:"🔥 الحمم تحاصر الاستراحة! لم يبقَ إلا خيار سريع.",
+        o:[["🌳 القفز نحو أقرب شجرة عالية",130,'win'],["🏃 الركض فوق السور الحجري",120,'win']] }
+    ]
   ],
   constantine: [
-    { t:"⚠️ صفارات الإنذار تدوي فوق جسور قسنطينة! الحمم تصعد من أعماق الوديان بسرعة.",
-      o:[["🌉 صعود حاجز الأمان الحجري على الجسر",120,1],["🏛️ التوجه نحو درجات المسرح العتيق",90,1]] },
-    { t:"🔥 الحمم تقترب من منتصف الساحة! عليك الوصول إلى النقطة الآمنة النهائية.",
-      o:[["🪜 التسلق نحو أعلى السور التاريخي",150,'win']] }
+    [
+      { t:"⚠️ تصاعدت الحمم من قاع وادي الرمال تحت الجسر المعلق!",
+        o:[["🌉 صعود حاجز الأمان الحديدي العالي",120,1],["🏛️ الهروب السريع نحو درجات المسرح",100,'win']] },
+      { t:"⚡ طوارئ: اهتز الجسر بفعل الحرارة الشديدة!",
+        o:[["🧗 الانبطاح والزحف نحو قاعدة العمود الحجري",140,'win'],["🏃 الركض نحو مدخل الصخرة المرتفعة",130,'win']] }
+    ],
+    [
+      { t:"⚠️ الحمم تغلق الأزقة الضيقة للمدينة العتيقة بقسنطينة!",
+        o:[["🪜 القفز فوق درابزين الشرفة التقليدية",130,'win'],["🧱 الصعود فوق السور الحجري التاريخي",110,'win']] }
+    ]
   ],
   oran: [
-    { t:"⚠️ الكورنيش والشاطئ يتحولان إلى حمم متوهجة! الارتفاع هو طوق النجاة الوحيد.",
-      o:[["🧗 الصعود نحو الصخور العالية المطلة على البحر",100,'win'],["🚗 القفز فوق سقف شاحنة مركونة بأمان",80,'win']] }
+    [
+      { t:"⚠️ مياه البحر على كورنيش وهران تتحول إلى أمواج حمم متوهجة!",
+        o:[["🧗 التسلق العاجل نحو صخور الكورنيش العالية",100,1],["🚗 الصعود فوق سقف سيارة مركونة",80,'win']] },
+      { t:"⚡ عاصفة حرارية مفاجئة تضرب الممر الساحلي!",
+        o:[["🏃 الركض نحو الدرج المرتفع للمطعم المطل",150,'win']] }
+    ],
+    [
+      { t:"⚠️ الحمم تغمر الرصيف الساحلي بسرعة! الكورنيش يختفي تحتها.",
+        o:[["🧱 الصعود فوق السور الحجري المطل على البحر",100,'win'],["🚗 القفز على سقف شاحنة مركونة",80,'win']] }
+    ]
   ],
   sba: [
-    { t:"⚠️ الحمم تتدفق نحو وسط سيدي بلعباس من جهة الوادي! الشوارع تمتلئ بالدخان.",
-      o:[["🌉 الركض فوق الجسر نحو الضفة المرتفعة",110,1],["🌳 تسلق الأشجار في الحديقة العامة",90,1],["🏢 صعود الدرج الخارجي لعمارة قريبة",70,1]] },
-    { t:"🔥 الحمم تحاصر الشارع الرئيسي! تحتاج إلى مكان آمن أعلى قبل أن ينتهي الوقت.",
-      o:[["🧱 القفز من حاجز إلى حاجز حتى سطح المبنى",150,'win'],["🏃 الركض عبر الأزقة الجانبية المرتفعة",120,'win']] }
+    [
+      { t:"⚠️ الحمم تتدفق نحو وسط سيدي بلعباس من جهة الوادي! الشوارع تمتلئ بالدخان.",
+        o:[["🌉 الركض فوق الجسر نحو الضفة المرتفعة",110,1],["🌳 تسلق الأشجار في الحديقة العامة",90,1],["🏢 صعود الدرج الخارجي لعمارة قريبة",70,1]] },
+      { t:"🔥 الحمم تحاصر الشارع الرئيسي! تحتاج إلى مكان آمن أعلى قبل أن ينتهي الوقت.",
+        o:[["🧱 القفز من حاجز إلى حاجز حتى سطح المبنى",150,'win'],["🏃 الركض عبر الأزقة الجانبية المرتفعة",120,'win']] }
+    ],
+    [
+      { t:"⚠️ الحمم تغلق ساحة وسط المدينة من ثلاث جهات! اختر مخرجك بسرعة.",
+        o:[["🏢 تسلق السلم المعدني الخارجي",120,'win'],["🌳 الصعود على شجرة كبيرة قرب الرصيف",90,'win']] }
+    ]
   ]
 };
+
+const PHOTOS = {
+  hamma: "https://images.unsplash.com/photo-1588591830209-ed94c7247bc3?q=80&w=600&auto=format&fit=crop",
+  constantine: "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?q=80&w=600&auto=format&fit=crop",
+  oran: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=600&auto=format&fit=crop"
+};
+let photoTry = 0;
+function setBg(l){
+  $('bg').className = 'bg ' + l;
+  const ph = $('photo'); ph.classList.remove('on'); ph.style.backgroundImage = '';
+  const url = PHOTOS[l];
+  if(!url || !navigator.onLine) return;       // offline or no photo: keep drawn background
+  const id = ++photoTry, img = new Image();
+  const t = setTimeout(() => { img.onload = img.onerror = null; }, 7000);
+  img.onload = () => { clearTimeout(t); if(id !== photoTry) return; ph.style.backgroundImage = 'url("' + url + '")'; ph.classList.add('on'); };
+  img.onerror = () => clearTimeout(t);       // failed: keep drawn background
+  img.src = url;
+}
+window.addEventListener('online', () => setBg(loc));
+window.addEventListener('offline', () => setBg(loc));
 
 function beep(freq=440, type='sine', dur=0.1){
   try{
@@ -195,7 +245,7 @@ function startTimer(){
 function load(){
   $('warn').textContent='⚠️ الحمم ترتفع!';
   startTimer();
-  const d = S[loc][step];
+  const d = chal[step];
   $('scene').textContent = d.t;
   const box = $('opts'); box.innerHTML = '';
   d.o.forEach(([txt, pts, next]) => {
@@ -211,7 +261,7 @@ function load(){
 function move(pts, next){
   beep(587.33,'sine',0.2); haptic([80,50,80]);
   score += pts; $('score').textContent = score;
-  if(next==='win') finish(true); else { step = next; load(); }
+  if(next==='win' || !chal[next]) finish(true); else { step = next; load(); }
 }
 function finish(win){
   clearInterval(tid);
@@ -228,8 +278,8 @@ function finish(win){
 }
 function start(){
   pname = $('pname').value.trim() || 'بطل الجزائر';
-  loc = $('loc').value; step = 0; score = 0; $('score').textContent = 0;
-  $('bg').className = 'bg ' + loc;
+  loc = $('loc').value; const pool = S[loc]; chal = pool[Math.floor(Math.random()*pool.length)]; step = 0; score = 0; $('score').textContent = 0;
+  setBg(loc);
   show('game'); load();
 }
 async function share(){
@@ -258,12 +308,13 @@ async function update(){
   location.reload();
 }
 
+setBg($('loc').value);
 $('start').addEventListener('click', start);
 $('share').addEventListener('click', share);
 $('home').addEventListener('click', () => show('setup'));
 $('again').addEventListener('click', () => show('setup'));
 $('upd').addEventListener('click', update);
-$('loc').addEventListener('change', () => { $('bg').className = 'bg ' + $('loc').value; });
+$('loc').addEventListener('change', () => { loc = $('loc').value; setBg(loc); });
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(console.error));

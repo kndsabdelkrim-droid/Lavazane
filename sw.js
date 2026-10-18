@@ -1,4 +1,4 @@
-const CACHE = 'lavazone-v2';
+const CACHE = 'lavazone-v3';
 const FILES = ['./', './index.html', './manifest.json', './icon.svg'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
@@ -10,7 +10,7 @@ self.addEventListener('activate', e => {
 });
 // network-first: always get the newest version when online, cache when offline
 self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
+  if (e.request.method !== 'GET' || new URL(e.request.url).origin !== location.origin) return;
   e.respondWith(
     fetch(e.request).then(res => {
       const copy = res.clone();
